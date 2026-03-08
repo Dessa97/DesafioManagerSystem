@@ -179,23 +179,6 @@ A aplicação vem com dois usuários pré-cadastrados para teste:
 
 ---
 
-## Testes
-
-O projeto inclui scripts de teste para validar funcionalidades:
-
-```bash
-# Testar login completo
-node test-login-completo.js
-
-# Testar API de países
-node test-paises.js
-
-# Testar renovação de token
-node verify-sistema.js
-```
-
----
-
 ## Documentação Adicional
 
 Para informações técnicas detalhadas, consulte:
@@ -276,16 +259,7 @@ Para dúvidas ou problemas:
 - `POST /pais/salvar` - Criar/atualizar país (admin)
 - `GET /pais/excluir?id={id}` - Excluir país (admin)
 
-## Testes
-
-### Testes Automáticos
-- Testes unitários de serviços
-- Testes de integração da API
-- Validação de autenticação
-- Validação de controle de acesso
-- Testes de CRUD de países
-
-### Testes Manuais Realizados
+## Testes Manuais Realizados
 - Autenticação com credenciais válidas
 - Autenticação com credenciais inválidas
 - Listagem de países
