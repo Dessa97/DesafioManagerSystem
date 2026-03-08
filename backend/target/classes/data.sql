@@ -7,4 +7,4 @@ INSERT INTO usuarios (login, senha, nome, administrador) VALUES
 INSERT INTO paises (nome, sigla, gentilico) VALUES 
 ('Brasil', 'BR', 'Brasileiro'),
 ('Argentina', 'AR', 'Argentino'),
-('Alemanha', 'DE', 'Alemão');
+('Alemanha', 'AL', 'Alemão');
