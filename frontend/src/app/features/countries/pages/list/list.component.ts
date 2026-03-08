@@ -47,10 +47,30 @@ import { Observable } from 'rxjs';
         <table class="paises-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Sigla</th>
-              <th>Gentílico</th>
+              <th (click)="ordenar('id')" class="sortable">
+                ID
+                <span class="sort-indicator" *ngIf="colunhaOrdenacao === 'id'">
+                  {{ direcaoOrdenacao === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
+              <th (click)="ordenar('nome')" class="sortable">
+                Nome
+                <span class="sort-indicator" *ngIf="colunhaOrdenacao === 'nome'">
+                  {{ direcaoOrdenacao === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
+              <th (click)="ordenar('sigla')" class="sortable">
+                Sigla
+                <span class="sort-indicator" *ngIf="colunhaOrdenacao === 'sigla'">
+                  {{ direcaoOrdenacao === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
+              <th (click)="ordenar('gentilico')" class="sortable">
+                Gentílico
+                <span class="sort-indicator" *ngIf="colunhaOrdenacao === 'gentilico'">
+                  {{ direcaoOrdenacao === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
               <th *ngIf="isAdministrador()">Ações</th>
             </tr>
           </thead>
@@ -210,6 +230,22 @@ import { Observable } from 'rxjs';
       color: #333;
     }
 
+    .paises-table th.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s;
+    }
+
+    .paises-table th.sortable:hover {
+      background-color: #e9ecef;
+    }
+
+    .sort-indicator {
+      margin-left: 5px;
+      font-size: 12px;
+      color: #007bff;
+    }
+
     .paises-table tbody tr:hover {
       background-color: #f5f5f5;
     }
@@ -304,6 +340,8 @@ export class ListComponent implements OnInit {
   itensPorPagina = 10;
   totalPaginas = 1;
   usuarioNome = '';
+  colunhaOrdenacao: string = 'id';
+  direcaoOrdenacao: 'asc' | 'desc' = 'asc';
 
   constructor(
     private paisService: PaisService,
@@ -323,7 +361,8 @@ export class ListComponent implements OnInit {
       next: (paises) => {
         this.paises = paises;
         this.paisesFiltradas = paises;
-        this.atualizarPaginacao();
+        this.paginaAtual = 1;
+        this.aplicarOrdenacao();
         this.loading = false;
       },
       error: () => {
@@ -340,7 +379,7 @@ export class ListComponent implements OnInit {
         next: (paises) => {
           this.paisesFiltradas = paises;
           this.paginaAtual = 1;
-          this.atualizarPaginacao();
+          this.aplicarOrdenacao();
           this.loading = false;
         },
         error: () => {
@@ -351,7 +390,7 @@ export class ListComponent implements OnInit {
     } else {
       this.paisesFiltradas = this.paises;
       this.paginaAtual = 1;
-      this.atualizarPaginacao();
+      this.aplicarOrdenacao();
     }
   }
 
@@ -407,6 +446,55 @@ export class ListComponent implements OnInit {
     if (usuario) {
       const usuarioObj = JSON.parse(usuario);
       this.usuarioNome = usuarioObj.nome || 'Usuário';
+    }
+  }
+
+  ordenar(coluna: string): void {
+    if (this.colunhaOrdenacao === coluna) {
+      this.direcaoOrdenacao = this.direcaoOrdenacao === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.colunhaOrdenacao = coluna;
+      this.direcaoOrdenacao = 'asc';
+    }
+    this.aplicarOrdenacao();
+  }
+
+  private aplicarOrdenacao(): void {
+    this.paisesFiltradas.sort((a, b) => {
+      let valorA = this.obterValorColuna(a, this.colunhaOrdenacao);
+      let valorB = this.obterValorColuna(b, this.colunhaOrdenacao);
+
+      if (typeof valorA === 'string') {
+        valorA = valorA.toLowerCase();
+        valorB = (valorB as string).toLowerCase();
+      }
+
+      let resultado = 0;
+      if (valorA < valorB) {
+        resultado = -1;
+      } else if (valorA > valorB) {
+        resultado = 1;
+      }
+
+      return this.direcaoOrdenacao === 'asc' ? resultado : -resultado;
+    });
+
+    this.paginaAtual = 1;
+    this.atualizarPaginacao();
+  }
+
+  private obterValorColuna(pais: Pais, coluna: string): any {
+    switch (coluna) {
+      case 'id':
+        return pais.id;
+      case 'nome':
+        return pais.nome;
+      case 'sigla':
+        return pais.sigla;
+      case 'gentilico':
+        return pais.gentilico;
+      default:
+        return '';
     }
   }
 
