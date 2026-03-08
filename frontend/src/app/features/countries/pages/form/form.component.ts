@@ -17,21 +17,18 @@ import { Pais } from '../../../../shared/models/pais.model';
           <button (click)="voltar()" class="btn-secondary">
             Voltar
           </button>
-          <button (click)="logout()" class="btn-secondary">
-            Sair
-          </button>
         </div>
       </div>
-      
+
       <div *ngIf="loading" class="loading">Carregando...</div>
-      
+
       <form *ngIf="!loading" [formGroup]="paisForm" (ngSubmit)="salvar()" class="pais-form">
         <div class="form-group">
           <label for="nome">Nome:</label>
-          <input 
-            id="nome" 
-            type="text" 
-            formControlName="nome" 
+          <input
+            id="nome"
+            type="text"
+            formControlName="nome"
             class="form-control"
             placeholder="Digite o nome do país"
           >
@@ -39,13 +36,13 @@ import { Pais } from '../../../../shared/models/pais.model';
             Nome é obrigatório e deve ter entre 3 e 100 caracteres
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="sigla">Sigla:</label>
-          <input 
-            id="sigla" 
-            type="text" 
-            formControlName="sigla" 
+          <input
+            id="sigla"
+            type="text"
+            formControlName="sigla"
             class="form-control"
             placeholder="Digite a sigla (2 caracteres)"
             maxlength="2"
@@ -55,13 +52,13 @@ import { Pais } from '../../../../shared/models/pais.model';
             Sigla é obrigatória e deve ter exatamente 2 caracteres
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="gentilico">Gentílico:</label>
-          <input 
-            id="gentilico" 
-            type="text" 
-            formControlName="gentilico" 
+          <input
+            id="gentilico"
+            type="text"
+            formControlName="gentilico"
             class="form-control"
             placeholder="Digite o gentílico"
           >
@@ -69,15 +66,15 @@ import { Pais } from '../../../../shared/models/pais.model';
             Gentílico é obrigatório e deve ter entre 3 e 100 caracteres
           </div>
         </div>
-        
+
         <div *ngIf="errorMessage" class="error-message">
           {{ errorMessage }}
         </div>
-        
+
         <div *ngIf="successMessage" class="success-message">
           {{ successMessage }}
         </div>
-        
+
         <div class="form-actions">
           <button type="submit" [disabled]="paisForm.invalid || saving" class="btn-primary">
             <span *ngIf="!saving">Salvar</span>
@@ -96,7 +93,7 @@ import { Pais } from '../../../../shared/models/pais.model';
       max-width: 600px;
       margin: 0 auto;
     }
-    
+
     .header {
       display: flex;
       justify-content: space-between;
@@ -105,12 +102,12 @@ import { Pais } from '../../../../shared/models/pais.model';
       flex-wrap: wrap;
       gap: 10px;
     }
-    
+
     .actions {
       display: flex;
       gap: 10px;
     }
-    
+
     .btn-secondary {
       background-color: #6c757d;
       color: white;
@@ -120,36 +117,36 @@ import { Pais } from '../../../../shared/models/pais.model';
       cursor: pointer;
       font-size: 14px;
     }
-    
+
     .btn-secondary:hover {
       background-color: #545b62;
     }
-    
+
     .loading {
       text-align: center;
       padding: 40px;
       font-size: 16px;
       color: #666;
     }
-    
+
     .pais-form {
       background: white;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    
+
     .form-group {
       margin-bottom: 1.5rem;
     }
-    
+
     label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 500;
       color: #333;
     }
-    
+
     .form-control {
       width: 100%;
       padding: 0.75rem;
@@ -158,19 +155,19 @@ import { Pais } from '../../../../shared/models/pais.model';
       font-size: 1rem;
       box-sizing: border-box;
     }
-    
+
     .form-control:focus {
       outline: none;
       border-color: #007bff;
       box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
     }
-    
+
     .error-message {
       color: #dc3545;
       font-size: 0.875rem;
       margin-top: 0.25rem;
     }
-    
+
     .success-message {
       color: #28a745;
       font-size: 0.875rem;
@@ -180,13 +177,13 @@ import { Pais } from '../../../../shared/models/pais.model';
       border: 1px solid #c3e6cb;
       border-radius: 4px;
     }
-    
+
     .form-actions {
       display: flex;
       gap: 10px;
       margin-top: 2rem;
     }
-    
+
     .btn-primary {
       background-color: #007bff;
       color: white;
@@ -197,11 +194,11 @@ import { Pais } from '../../../../shared/models/pais.model';
       cursor: pointer;
       transition: background-color 0.2s;
     }
-    
+
     .btn-primary:hover:not(:disabled) {
       background-color: #0056b3;
     }
-    
+
     .btn-primary:disabled {
       background-color: #6c757d;
       cursor: not-allowed;
@@ -270,7 +267,7 @@ export class FormComponent implements OnInit {
       next: () => {
         this.successMessage = 'País salvo com sucesso!';
         this.saving = false;
-        
+
         setTimeout(() => {
           this.voltar();
         }, 1500);
@@ -290,9 +287,5 @@ export class FormComponent implements OnInit {
 
   voltar(): void {
     this.router.navigate(['/list']);
-  }
-
-  logout(): void {
-    this.router.navigate(['/login']);
   }
 }

@@ -20,29 +20,29 @@ import { Observable } from 'rxjs';
       <div class="header">
         <h2>Lista de Países</h2>
         <div class="actions">
-          <input 
-            type="text" 
-            [(ngModel)]="termoBusca" 
+          <input
+            type="text"
+            [(ngModel)]="termoBusca"
             (keyup)="buscar()"
             placeholder="Buscar por nome..."
             class="search-input"
           >
-          <button 
+          <button
             *ngIf="isAdministrador()"
-            (click)="novoPais()" 
+            (click)="novoPais()"
             class="btn-primary"
           >
             Novo País
           </button>
         </div>
       </div>
-      
+
       <div *ngIf="loading" class="loading">Carregando...</div>
-      
+
       <div *ngIf="!loading && paises.length === 0" class="no-data">
         Nenhum país encontrado.
       </div>
-      
+
       <div *ngIf="!loading && paises.length > 0" class="table-container">
         <table class="paises-table">
           <thead>
@@ -67,10 +67,10 @@ import { Observable } from 'rxjs';
             </tr>
           </tbody>
         </table>
-        
+
         <div *ngIf="totalPaginas > 1" class="pagination">
-          <button 
-            (click)="paginaAnterior()" 
+          <button
+            (click)="paginaAnterior()"
             [disabled]="paginaAtual === 1"
             class="btn-pagination"
           >
@@ -79,14 +79,18 @@ import { Observable } from 'rxjs';
           <span class="page-info">
             Página {{ paginaAtual }} de {{ totalPaginas }}
           </span>
-          <button 
-            (click)="proximaPagina()" 
+          <button
+            (click)="proximaPagina()"
             [disabled]="paginaAtual === totalPaginas"
             class="btn-pagination"
           >
             Próxima
           </button>
         </div>
+      </div>
+
+      <div class="back-button-container">
+        <button (click)="voltarHome()" class="btn-back">Voltar</button>
       </div>
     </div>
   `,
@@ -96,7 +100,7 @@ import { Observable } from 'rxjs';
       max-width: 1200px;
       margin: 0 auto;
     }
-    
+
     .user-info {
       text-align: right;
       margin-bottom: 15px;
@@ -108,13 +112,13 @@ import { Observable } from 'rxjs';
       justify-content: space-between;
       align-items: center;
     }
-    
+
     .user-name {
       font-weight: 600;
       color: #333;
       font-size: 16px;
     }
-    
+
     .header {
       display: flex;
       justify-content: space-between;
@@ -123,14 +127,14 @@ import { Observable } from 'rxjs';
       flex-wrap: wrap;
       gap: 10px;
     }
-    
+
     .actions {
       display: flex;
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
     }
-    
+
     .search-input {
       padding: 8px 12px;
       border: 1px solid #ddd;
@@ -138,7 +142,7 @@ import { Observable } from 'rxjs';
       font-size: 14px;
       min-width: 200px;
     }
-    
+
     .btn-primary {
       background-color: #007bff;
       color: white;
@@ -148,11 +152,11 @@ import { Observable } from 'rxjs';
       cursor: pointer;
       font-size: 14px;
     }
-    
+
     .btn-primary:hover {
       background-color: #0056b3;
     }
-    
+
     .btn-secondary {
       background-color: #6c757d;
       color: white;
@@ -162,29 +166,29 @@ import { Observable } from 'rxjs';
       cursor: pointer;
       font-size: 14px;
     }
-    
+
     .btn-secondary:hover {
       background-color: #545b62;
     }
-    
+
     .loading {
       text-align: center;
       padding: 40px;
       font-size: 16px;
       color: #666;
     }
-    
+
     .no-data {
       text-align: center;
       padding: 40px;
       font-size: 16px;
       color: #666;
     }
-    
+
     .table-container {
       overflow-x: auto;
     }
-    
+
     .paises-table {
       width: 100%;
       border-collapse: collapse;
@@ -192,24 +196,24 @@ import { Observable } from 'rxjs';
       background: white;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    
+
     .paises-table th,
     .paises-table td {
       padding: 12px;
       text-align: left;
       border-bottom: 1px solid #ddd;
     }
-    
+
     .paises-table th {
       background-color: #f8f9fa;
       font-weight: 600;
       color: #333;
     }
-    
+
     .paises-table tbody tr:hover {
       background-color: #f5f5f5;
     }
-    
+
     .btn-small {
       padding: 4px 8px;
       margin-right: 5px;
@@ -218,25 +222,25 @@ import { Observable } from 'rxjs';
       cursor: pointer;
       font-size: 12px;
     }
-    
+
     .btn-edit {
       background-color: #28a745;
       color: white;
     }
-    
+
     .btn-edit:hover {
       background-color: #218838;
     }
-    
+
     .btn-delete {
       background-color: #dc3545;
       color: white;
     }
-    
+
     .btn-delete:hover {
       background-color: #c82333;
     }
-    
+
     .pagination {
       display: flex;
       justify-content: center;
@@ -244,7 +248,7 @@ import { Observable } from 'rxjs';
       gap: 15px;
       margin-top: 20px;
     }
-    
+
     .btn-pagination {
       padding: 8px 16px;
       border: 1px solid #ddd;
@@ -252,19 +256,41 @@ import { Observable } from 'rxjs';
       cursor: pointer;
       border-radius: 4px;
     }
-    
+
     .btn-pagination:hover:not(:disabled) {
       background-color: #f8f9fa;
     }
-    
+
     .btn-pagination:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
-    
+
     .page-info {
       font-size: 14px;
       color: #666;
+    }
+
+    .back-button-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 30px;
+      padding-right: 20px;
+    }
+
+    .btn-back {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .btn-back:hover {
+      background-color: #545b62;
     }
   `]
 })
@@ -362,6 +388,10 @@ export class ListComponent implements OnInit {
       this.paginaAtual++;
       this.atualizarPaginacao();
     }
+  }
+
+  voltarHome(): void {
+    this.router.navigate(['/home']);
   }
 
   logout(): void {
