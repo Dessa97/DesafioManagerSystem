@@ -307,10 +307,6 @@ Para dúvidas ou problemas:
 - Standalone Components
 - CSS3 Moderno
 
-## Licença
-
-MIT License - Software livre para uso e modificação.
-
 ---
 
 ## Conclusão
