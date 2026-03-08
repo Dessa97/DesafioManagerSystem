@@ -54,8 +54,8 @@ import { LoginRequest } from '../../../../shared/models/usuario.model';
         
         <div class="demo-credentials">
           <h4>Credenciais de Demonstração:</h4>
-          <p><strong>Usuário Comum:</strong> convidado / manager</p>
-          <p><strong>Administrador:</strong> admin / suporte</p>
+          <p><strong>Usuário Comum - </strong> <span class="blue-text">login</span>: convidado / <span class="blue-text">senha</span>: manager</p>
+          <p><strong>Administrador - </strong> <span class="blue-text">login</span>: admin / <span class="blue-text">senha</span>: suporte</p>
         </div>
       </div>
     </div>
@@ -163,6 +163,11 @@ import { LoginRequest } from '../../../../shared/models/usuario.model';
       margin: 0.25rem 0;
       font-size: 0.875rem;
     }
+    
+    .blue-text {
+      color: #007bff;
+      font-weight: 500;
+    }
   `]
 })
 export class LoginComponent {
@@ -193,7 +198,7 @@ export class LoginComponent {
 
     this.authService.login(loginRequest).subscribe({
       next: () => {
-        this.router.navigate(['/paises']);
+        this.router.navigate(['/home']);
       },
       error: () => {
         this.errorMessage = 'Credenciais inválidas. Tente novamente.';

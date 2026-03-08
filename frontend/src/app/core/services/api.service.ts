@@ -14,10 +14,13 @@ export class ApiService {
     const token = localStorage.getItem('token');
     if (token) {
       return new HttpHeaders({
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       });
     }
-    return new HttpHeaders();
+    return new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
   }
 
   get<T>(endpoint: string): Observable<T> {
@@ -45,6 +48,10 @@ export class ApiService {
   }
 
   postWithoutAuth<T>(endpoint: string, data: any): Observable<T> {
-    return this.http.post<T>(`${this.apiUrl}${endpoint}`, data);
+    return this.http.post<T>(`${this.apiUrl}${endpoint}`, data, {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    });
   }
 }

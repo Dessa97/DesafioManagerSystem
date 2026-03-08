@@ -12,13 +12,23 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/pages/login/login.component').then(m => m.LoginComponent)
   },
   {
-    path: 'paises',
-    loadComponent: () => import('./features/paises/pages/list/list.component').then(m => m.ListComponent),
+    path: 'home',
+    loadComponent: () => import('./features/countries/pages/home/home.component').then(m => m.HomeComponent),
     canActivate: [AuthGuard]
   },
   {
-    path: 'paises/manage',
-    loadComponent: () => import('./features/paises/pages/manage/manage.component').then(m => m.ManageComponent),
+    path: 'form',
+    loadComponent: () => import('./features/countries/pages/form/form.component').then(m => m.FormComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'form/:id',
+    loadComponent: () => import('./features/countries/pages/form/form.component').then(m => m.FormComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'list',
+    loadComponent: () => import('./features/countries/pages/list/list.component').then(m => m.ListComponent),
     canActivate: [AuthGuard]
   }
 ];

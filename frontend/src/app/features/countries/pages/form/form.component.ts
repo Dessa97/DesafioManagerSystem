@@ -6,7 +6,7 @@ import { PaisService } from '../../../../core/services/pais.service';
 import { Pais } from '../../../../shared/models/pais.model';
 
 @Component({
-  selector: 'app-manage',
+  selector: 'app-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
@@ -208,7 +208,7 @@ import { Pais } from '../../../../shared/models/pais.model';
     }
   `]
 })
-export class ManageComponent implements OnInit {
+export class FormComponent implements OnInit {
   paisForm: FormGroup;
   loading = false;
   saving = false;
@@ -289,7 +289,7 @@ export class ManageComponent implements OnInit {
   }
 
   voltar(): void {
-    this.router.navigate(['/paises']);
+    this.router.navigate(['/list']);
   }
 
   logout(): void {

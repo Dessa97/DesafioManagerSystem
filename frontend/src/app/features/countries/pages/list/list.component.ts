@@ -330,13 +330,11 @@ export class ListComponent implements OnInit {
   }
 
   novoPais(): void {
-    this.router.navigate(['/paises/manage']);
+    this.router.navigate(['/form']);
   }
 
   editar(pais: Pais): void {
-    this.router.navigate(['/paises/manage'], { 
-      queryParams: { id: pais.id } 
-    });
+    this.router.navigate(['/form/' + pais.id]);
   }
 
   excluir(pais: Pais): void {

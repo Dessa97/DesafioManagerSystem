@@ -9,15 +9,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const loginTime = usuarioObj.loginTime;
     const agora = new Date().getTime();
     const expiracao = loginTime + (4 * 60 * 1000); // 4 minutos
-    
+
     if (agora > expiracao) {
-      console.log('Token expirando, tentando renovar...');
       return renovarTokenERefazer(req, next);
     }
   }
 
   const token = localStorage.getItem('token');
-  
+
   if (token) {
     req = req.clone({
       setHeaders: { Authorization: `Bearer ${token}` }
@@ -28,7 +27,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: any) => {
       if (error instanceof HttpErrorResponse && error.status === 401) {
         // Fallback: tentar renovação se verificação falhar
-        console.log('401 recebido, tentando renovar token...');
         return renovarTokenERefazer(req, next);
       }
       return throwError(error);
@@ -38,9 +36,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 function renovarTokenERefazer(req: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> {
   const tokenAtual = localStorage.getItem('token');
-  
+
   if (!tokenAtual) {
-    console.log('Nenhum token para renovar');
     return throwError(() => new Error('Nenhum token disponível'));
   }
 
@@ -49,50 +46,45 @@ function renovarTokenERefazer(req: HttpRequest<any>, next: HttpHandlerFn): Obser
     renovarReq.open('POST', 'http://localhost:8080/api/usuario/renovar-ticket');
     renovarReq.setRequestHeader('Content-Type', 'application/json');
     renovarReq.setRequestHeader('Authorization', `Bearer ${tokenAtual}`);
-    
+
     renovarReq.onload = () => {
       if (renovarReq.status === 200) {
         try {
           const tokenResponse = JSON.parse(renovarReq.responseText);
-          
+
           // Salvar token e dados do usuário
           localStorage.setItem('token', tokenResponse.token);
           localStorage.setItem('usuario', JSON.stringify({
             ...tokenResponse,
             loginTime: new Date().getTime()
           }));
-          
-          console.log('Token renovado com sucesso');
-          
+
           // Refazer requisição original com novo token
           const clonedReq = req.clone({
             setHeaders: { Authorization: `Bearer ${tokenResponse.token}` }
           });
-          
+
           next(clonedReq).subscribe({
             next: (response) => observer.next(response),
             error: (err) => observer.error(err),
             complete: () => observer.complete()
           });
-          
+
         } catch (e) {
-          console.error('Erro ao parsear resposta de renovação:', e);
           observer.error(e);
         }
       } else {
-        console.error('Falha na renovação:', renovarReq.status);
         // Se falhar renovação, limpar e redirecionar
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
         observer.error(new Error('Falha na renovação do token'));
       }
     };
-    
+
     renovarReq.onerror = () => {
-      console.error('Erro na requisição de renovação');
       observer.error(new Error('Erro na comunicação com servidor'));
     };
-    
+
     renovarReq.send();
   });
 }
