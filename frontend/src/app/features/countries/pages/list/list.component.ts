@@ -337,7 +337,7 @@ export class ListComponent implements OnInit {
   loading = false;
   termoBusca = '';
   paginaAtual = 1;
-  itensPorPagina = 10;
+  itensPorPagina = 5;
   totalPaginas = 1;
   usuarioNome = '';
   colunhaOrdenacao: string = 'id';
