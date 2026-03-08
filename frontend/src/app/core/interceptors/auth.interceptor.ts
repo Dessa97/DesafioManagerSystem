@@ -1,90 +1,132 @@
-import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
-import { Observable, throwError, catchError, switchMap } from 'rxjs';
+import {
+  HttpInterceptorFn,
+  HttpErrorResponse,
+  HttpRequest,
+  HttpHandlerFn,
+  HttpEvent
+} from '@angular/common/http';
+import {
+  Observable,
+  throwError,
+  catchError,
+  switchMap,
+  BehaviorSubject
+} from 'rxjs';
+import { inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { UsuarioAutenticado } from '../../shared/models/usuario.model';
+
+// Subject para controlar refresh de token em andamento
+let seRefreshando = false;
+const refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // Verificar se o token está expirando ANTES de cada requisição
-  const usuario = localStorage.getItem('usuario');
-  if (usuario) {
-    const usuarioObj = JSON.parse(usuario);
-    const loginTime = usuarioObj.loginTime;
-    const agora = new Date().getTime();
-    const expiracao = loginTime + (4 * 60 * 1000); // 4 minutos
+  const http = inject(HttpClient);
+  const router = inject(Router);
 
-    if (agora > expiracao) {
-      return renovarTokenERefazer(req, next);
-    }
-  }
-
+  // Adicionar token à requisição se existir
   const token = localStorage.getItem('token');
-
   if (token) {
-    req = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
+    req = adicionarToken(req, token);
   }
 
   return next(req).pipe(
-    catchError((error: any) => {
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        // Fallback: tentar renovação se verificação falhar
-        return renovarTokenERefazer(req, next);
+    catchError((erro: any) => {
+      // Se receber 401, tentar renovar o token
+      if (erro instanceof HttpErrorResponse && erro.status === 401) {
+        return tratarErro401(req, next, http, router);
       }
-      return throwError(error);
+
+      return throwError(() => erro);
     })
   );
 };
 
-function renovarTokenERefazer(req: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> {
-  const tokenAtual = localStorage.getItem('token');
-
-  if (!tokenAtual) {
-    return throwError(() => new Error('Nenhum token disponível'));
+function adicionarToken(req: HttpRequest<any>, token: string): HttpRequest<any> {
+  // Não adicionar Authorization apenas a requisições de autenticação inicial
+  if (req.url.includes('/usuario/autenticar')) {
+    return req;
   }
 
-  return new Observable(observer => {
-    const renovarReq = new XMLHttpRequest();
-    renovarReq.open('POST', 'http://localhost:8080/api/usuario/renovar-ticket');
-    renovarReq.setRequestHeader('Content-Type', 'application/json');
-    renovarReq.setRequestHeader('Authorization', `Bearer ${tokenAtual}`);
+  return req.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
 
-    renovarReq.onload = () => {
-      if (renovarReq.status === 200) {
-        try {
-          const tokenResponse = JSON.parse(renovarReq.responseText);
+function tratarErro401(
+  req: HttpRequest<any>,
+  next: HttpHandlerFn,
+  http: HttpClient,
+  router: Router
+): Observable<HttpEvent<any>> {
+  const tokenAtual = localStorage.getItem('token');
 
-          // Salvar token e dados do usuário
-          localStorage.setItem('token', tokenResponse.token);
-          localStorage.setItem('usuario', JSON.stringify({
-            ...tokenResponse,
-            loginTime: new Date().getTime()
-          }));
+  // Se não tem token, ir para login
+  if (!tokenAtual) {
+    router.navigate(['/login']);
+    return throwError(() => new Error('Sem token disponível'));
+  }
 
-          // Refazer requisição original com novo token
-          const clonedReq = req.clone({
-            setHeaders: { Authorization: `Bearer ${tokenResponse.token}` }
-          });
-
-          next(clonedReq).subscribe({
-            next: (response) => observer.next(response),
-            error: (err) => observer.error(err),
-            complete: () => observer.complete()
-          });
-
-        } catch (e) {
-          observer.error(e);
+  // Se já está tentando renovar, aguardar o resultado
+  if (seRefreshando) {
+    return refreshTokenSubject.pipe(
+      switchMap((novoToken: string | null) => {
+        if (novoToken) {
+          const reqComNovoToken = adicionarToken(req, novoToken);
+          return next(reqComNovoToken);
+        } else {
+          // Falhou na renovação
+          return throwError(() => new Error('Falha na renovação do token'));
         }
-      } else {
-        // Se falhar renovação, limpar e redirecionar
-        localStorage.removeItem('token');
-        localStorage.removeItem('usuario');
-        observer.error(new Error('Falha na renovação do token'));
-      }
-    };
+      })
+    );
+  }
 
-    renovarReq.onerror = () => {
-      observer.error(new Error('Erro na comunicação com servidor'));
-    };
+  // Marca que está renovando
+  seRefreshando = true;
 
-    renovarReq.send();
+  // Tentar renovar o token
+  return renovarToken(tokenAtual, http).pipe(
+    switchMap((resposta: UsuarioAutenticado) => {
+      seRefreshando = false;
+
+      // Salvar novo token
+      localStorage.setItem('token', resposta.token);
+      localStorage.setItem('usuario', JSON.stringify({
+        ...resposta,
+        loginTime: new Date().getTime()
+      }));
+
+      // Notificar sucesso
+      refreshTokenSubject.next(resposta.token);
+
+      // Refazer requisição original com novo token
+      const reqComNovoToken = adicionarToken(req, resposta.token);
+      return next(reqComNovoToken);
+    }),
+    catchError((erro) => {
+      seRefreshando = false;
+
+      // Falhou na renovação, deslogar usuário
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuario');
+      refreshTokenSubject.next(null);
+
+      router.navigate(['/login']);
+
+      return throwError(() => new Error('Falha na autenticação. Faça login novamente.'));
+    })
+  );
+}
+
+function renovarToken(token: string, http: HttpClient): Observable<UsuarioAutenticado> {
+  return http.get<UsuarioAutenticado>('http://localhost:8080/api/usuario/renovar-ticket', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
   });
 }

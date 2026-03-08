@@ -48,22 +48,23 @@ export class AuthService {
   tokenEstaExpirando(): boolean {
     const token = localStorage.getItem('token');
     const usuario = localStorage.getItem('usuario');
-    
+
     if (!token || !usuario) {
       return true;
     }
 
     const usuarioObj = JSON.parse(usuario);
     const loginTime = usuarioObj.loginTime;
-    
+
     if (!loginTime) {
       return true;
     }
 
     const agora = new Date().getTime();
-    const expiracao = loginTime + (4 * 60 * 1000); // 4 minutos (renova 1 minuto antes)
-    
-    return agora > expiracao;
+    const expiracao = loginTime + (5 * 60 * 1000); // 5 minutos (sincronizado com backend)
+
+    // Retornar true se faltam menos de 1 minuto para expirar
+    return agora > (expiracao - 60 * 1000);
   }
 
   isAdministrador(): boolean {
@@ -71,7 +72,7 @@ export class AuthService {
     if (!usuario) {
       return false;
     }
-    
+
     const usuarioObj = JSON.parse(usuario);
     return usuarioObj.administrador || false;
   }
@@ -82,12 +83,12 @@ export class AuthService {
     return !!(token && usuario);
   }
 
-  private salvarDadosUsuario(usuarioAutenticado: UsuarioAutenticado): void {
+  salvarDadosUsuario(usuarioAutenticado: UsuarioAutenticado): void {
     const usuarioComTimestamp = {
       ...usuarioAutenticado,
       loginTime: new Date().getTime()
     };
-    
+
     localStorage.setItem('token', usuarioAutenticado.token);
     localStorage.setItem('usuario', JSON.stringify(usuarioComTimestamp));
     this.usuarioLogadoSubject.next(usuarioComTimestamp);
@@ -96,7 +97,7 @@ export class AuthService {
   private verificarTokenExistente(): void {
     const token = localStorage.getItem('token');
     const usuario = localStorage.getItem('usuario');
-    
+
     if (token && usuario) {
       const usuarioObj = JSON.parse(usuario);
       this.usuarioLogadoSubject.next(usuarioObj);

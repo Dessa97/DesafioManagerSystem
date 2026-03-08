@@ -228,7 +228,7 @@ export class FormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const id = this.route.snapshot.queryParamMap.get('id');
+    const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdicao = true;
       this.carregarPais(parseInt(id));
