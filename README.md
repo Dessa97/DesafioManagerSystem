@@ -115,11 +115,6 @@ cd frontend
 npm install
 
 # Inicie o servidor de desenvolvimento
-ng serve --open
-```
-
-**Ou use mais direto:**
-```bash
 npx ng serve --open
 ```
 
