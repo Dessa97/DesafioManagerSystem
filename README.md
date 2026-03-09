@@ -91,8 +91,11 @@ Certifique-se de ter instalado:
 # Navegue até a pasta backend
 cd backend
 
+# Instale as dependências
+mvn install
+
 # Inicie o servidor Spring Boot
-mvnw.cmd spring-boot:run
+mvn spring-boot:run
 ```
 
 **Aguarde até ver:** `Tomcat started on port(s): 8080`
